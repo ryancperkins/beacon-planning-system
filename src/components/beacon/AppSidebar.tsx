@@ -7,15 +7,7 @@ import {
 import { BeaconLogo } from "./BeaconLogo";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-
-const navItems = [
-  { id: "/timeline", label: "Timeline", icon: Calendar },
-  { id: "/inbox", label: "Inbox", icon: Inbox, badge: 3 },
-  { id: "/initiatives", label: "Initiatives", icon: FileText },
-  { id: "/library", label: "Library", icon: BookOpen },
-  { id: "/community", label: "Community", icon: Users },
-  { id: "/mentorship", label: "Mentorship", icon: GraduationCap },
-];
+import { useInboxCount } from "@/hooks/useInboxCount";
 
 const bottomItems = [
   { id: "/integrations", label: "Integrations", icon: Puzzle },
@@ -28,6 +20,16 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
+  const inboxCount = useInboxCount();
+
+  const navItems = [
+    { id: "/timeline", label: "Timeline", icon: Calendar },
+    { id: "/inbox", label: "Inbox", icon: Inbox, badge: inboxCount > 0 ? inboxCount : undefined },
+    { id: "/initiatives", label: "Initiatives", icon: FileText },
+    { id: "/library", label: "Library", icon: BookOpen },
+    { id: "/community", label: "Community", icon: Users },
+    { id: "/mentorship", label: "Mentorship", icon: GraduationCap },
+  ];
 
   const w = collapsed ? 60 : 220;
 
