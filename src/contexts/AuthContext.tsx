@@ -15,17 +15,27 @@ interface Church {
   name: string;
 }
 
+interface MinistryMembership {
+  ministry_id: string;
+  role: string;
+}
+
+type AppRole = string | null;
+
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   church: Church | null;
+  role: AppRole;
+  userMinistries: MinistryMembership[];
   loading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   createChurch: (churchName: string, campusName: string) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
+  isDirectorOf: (ministryId: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue>({} as AuthContextValue);
@@ -35,6 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [church, setChurch] = useState<Church | null>(null);
+  const [role, setRole] = useState<AppRole>(null);
+  const [userMinistries, setUserMinistries] = useState<MinistryMembership[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -54,6 +66,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (churchData) setChurch(churchData as Church);
       }
     }
+
+    // Fetch role
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .limit(1)
+      .single();
+    setRole(roleData?.role ?? null);
+
+    // Fetch ministry memberships
+    const { data: ministryData } = await supabase
+      .from("ministry_members")
+      .select("ministry_id, role")
+      .eq("user_id", userId);
+    setUserMinistries(ministryData || []);
   };
 
   useEffect(() => {
@@ -66,6 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setProfile(null);
           setChurch(null);
+          setRole(null);
+          setUserMinistries([]);
         }
         setLoading(false);
       }
@@ -106,12 +136,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setChurch(null);
+    setRole(null);
+    setUserMinistries([]);
   };
 
   const createChurch = async (churchName: string, campusName: string) => {
     if (!user) return { error: new Error("Not authenticated") };
 
-    // Create church
     const { data: churchData, error: churchError } = await supabase
       .from("churches")
       .insert({ name: churchName, created_by: user.id })
@@ -120,29 +151,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (churchError) return { error: churchError };
 
-    // Create default campus
     await supabase.from("campuses").insert({
       church_id: churchData.id,
       name: campusName,
     });
 
-    // Update profile with church_id
     await supabase
       .from("profiles")
       .update({ church_id: churchData.id, full_name: user.user_metadata?.full_name || "" })
       .eq("id", user.id);
 
-    // Assign admin role
     await supabase.from("user_roles").insert({
       user_id: user.id,
       role: "admin",
     });
 
     await fetchProfile(user.id);
-    
-    // Seed demo data
+
     try { await seedDemoData(churchData.id, user.id); } catch (e) { console.warn("Seed data error:", e); }
-    
+
     return { error: null };
   };
 
@@ -150,10 +177,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchProfile(user.id);
   };
 
+  const isDirectorOf = (ministryId: string) =>
+    userMinistries.some((m) => m.ministry_id === ministryId && m.role === "director");
+
   return (
     <AuthContext.Provider value={{
-      user, session, profile, church, loading,
-      signUp, signIn, signOut, createChurch, refreshProfile,
+      user, session, profile, church, role, userMinistries, loading,
+      signUp, signIn, signOut, createChurch, refreshProfile, isDirectorOf,
     }}>
       {children}
     </AuthContext.Provider>
