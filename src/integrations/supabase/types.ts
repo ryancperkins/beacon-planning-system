@@ -156,6 +156,7 @@ export type Database = {
           token_cost_estimate: number | null
           token_cost_final: number | null
           updated_at: string
+          visible_to_all_staff: boolean
         }
         Insert: {
           audience?: string | null
@@ -181,6 +182,7 @@ export type Database = {
           token_cost_estimate?: number | null
           token_cost_final?: number | null
           updated_at?: string
+          visible_to_all_staff?: boolean
         }
         Update: {
           audience?: string | null
@@ -206,6 +208,7 @@ export type Database = {
           token_cost_estimate?: number | null
           token_cost_final?: number | null
           updated_at?: string
+          visible_to_all_staff?: boolean
         }
         Relationships: [
           {
@@ -263,6 +266,48 @@ export type Database = {
           },
         ]
       }
+      ministry_members: {
+        Row: {
+          church_id: string
+          created_at: string
+          id: string
+          ministry_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          church_id: string
+          created_at?: string
+          id?: string
+          ministry_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          church_id?: string
+          created_at?: string
+          id?: string
+          ministry_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_members_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_members_ministry_id_fkey"
+            columns: ["ministry_id"]
+            isOneToOne: false
+            referencedRelation: "ministries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -288,6 +333,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resources: {
+        Row: {
+          category: string
+          church_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          file_url: string | null
+          id: string
+          thumbnail_url: string | null
+          title: string
+        }
+        Insert: {
+          category?: string
+          church_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          title: string
+        }
+        Update: {
+          category?: string
+          church_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_church_id_fkey"
             columns: ["church_id"]
             isOneToOne: false
             referencedRelation: "churches"
@@ -452,12 +541,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_app_role: { Args: { _user_id: string }; Returns: string }
       get_user_church_id: { Args: { _user_id: string }; Returns: string }
+      get_user_ministry_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_ministry_director: {
+        Args: { _ministry_id: string; _user_id: string }
         Returns: boolean
       }
     }
@@ -468,6 +563,8 @@ export type Database = {
         | "ministry_leader"
         | "mentor"
         | "community_member"
+        | "ministry_director"
+        | "ministry_user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -601,6 +698,8 @@ export const Constants = {
         "ministry_leader",
         "mentor",
         "community_member",
+        "ministry_director",
+        "ministry_user",
       ],
     },
   },

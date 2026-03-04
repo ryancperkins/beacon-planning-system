@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2, AlertTriangle } from "lucide-rea
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { GlassPanel } from "@/components/beacon/GlassPanel";
 import { toast } from "sonner";
 import { differenceInDays, startOfToday, format } from "date-fns";
@@ -50,6 +51,7 @@ function generateTiers(channels: string[], isRush: boolean) {
 
 export default function CreateInitiativePage() {
   const { church, user } = useAuth();
+  const { isDirector, userMinistryIds, isAdmin, isCreativeTeam } = usePermissions();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -226,7 +228,7 @@ export default function CreateInitiativePage() {
               <label className="font-body" style={labelStyle}>Ministry *</label>
               <select value={form.ministry_id} onChange={(e) => update("ministry_id", e.target.value)} style={inputStyle}>
                 <option value="">Select ministry...</option>
-                {ministries.map((m: any) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                {ministries.filter((m: any) => isAdmin || isCreativeTeam || userMinistryIds.includes(m.id)).map((m: any) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </div>
             <div>
