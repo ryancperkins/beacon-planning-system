@@ -228,7 +228,7 @@ export default function CreateInitiativePage() {
               <label className="font-body" style={labelStyle}>Ministry *</label>
               <select value={form.ministry_id} onChange={(e) => update("ministry_id", e.target.value)} style={inputStyle}>
                 <option value="">Select ministry...</option>
-                {ministries.map((m: any) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                {ministries.filter((m: any) => isAdmin || isCreativeTeam || userMinistryIds.includes(m.id)).map((m: any) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </div>
             <div>
