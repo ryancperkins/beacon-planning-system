@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { seedDemoData } from "@/lib/seedData";
 import type { User, Session } from "@supabase/supabase-js";
-
-// Use the auto-generated client which has the correct env vars
 
 interface Profile {
   id: string;
