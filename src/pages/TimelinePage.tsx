@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -6,12 +6,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { GlassPanel } from "@/components/beacon/GlassPanel";
 import { StatusChip } from "@/components/beacon/StatusChip";
-import { format, isAfter, isBefore, startOfToday, addMonths, parseISO } from "date-fns";
+import { format, isAfter, isBefore, startOfToday, addDays, addMonths, parseISO } from "date-fns";
+
+const RANGES = [
+  { label: "30d", days: 30 },
+  { label: "90d", days: 90 },
+  { label: "180d", days: 180 },
+];
+
+const TYPE_FILTERS = [
+  { value: "all", label: "All Types" },
+  { value: "campaign", label: "Campaign" },
+  { value: "series", label: "Series" },
+  { value: "event", label: "Event" },
+];
 
 export default function TimelinePage() {
   const { church } = useAuth();
   const navigate = useNavigate();
   const today = startOfToday();
+  const [rangeDays, setRangeDays] = useState(90);
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const { data: initiatives = [], isLoading } = useQuery({
     queryKey: ["initiatives-timeline", church?.id],
@@ -28,8 +43,8 @@ export default function TimelinePage() {
     enabled: !!church?.id,
   });
 
-  // Group into: Active Now, Coming Up (next 60 days), Later, Past
   const groups = useMemo(() => {
+    const rangeEnd = addDays(today, rangeDays);
     const cutoff = addMonths(today, 2);
     const active: any[] = [];
     const upcoming: any[] = [];
@@ -37,8 +52,14 @@ export default function TimelinePage() {
     const past: any[] = [];
 
     initiatives.forEach((i: any) => {
+      if (typeFilter !== "all" && i.initiative_type !== typeFilter) return;
+
       const start = parseISO(i.start_date);
       const end = parseISO(i.end_date);
+
+      // Filter: skip if entire range is outside window
+      if (isAfter(start, rangeEnd) && isAfter(end, rangeEnd)) return;
+      if (isBefore(end, addDays(today, -rangeDays))) return;
 
       if (i.status === "Complete" || isBefore(end, today)) {
         past.push(i);
@@ -57,19 +78,70 @@ export default function TimelinePage() {
       { label: "Later", items: later, accent: false },
       { label: "Past", items: past, accent: false },
     ].filter((g) => g.items.length > 0);
-  }, [initiatives, today]);
+  }, [initiatives, today, rangeDays, typeFilter]);
 
   const typeLabel = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-display" style={{ fontSize: 21, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em" }}>
-          Timeline
-        </h1>
-        <p className="font-body mt-1" style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
-          What's happening across your church
-        </p>
+      {/* Header with range toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+        <div>
+          <h1 className="font-display" style={{ fontSize: 21, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em" }}>
+            Timeline
+          </h1>
+          <p className="font-body mt-1" style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
+            What's happening across your church
+          </p>
+        </div>
+        {/* Range toggle */}
+        <div className="flex rounded-full self-start overflow-hidden" style={{ background: "var(--bg-inset)", border: "1px solid var(--border)" }}>
+          {RANGES.map((r) => (
+            <button
+              key={r.label}
+              onClick={() => setRangeDays(r.days)}
+              className="font-body px-3 py-1"
+              style={{
+                border: "none", cursor: "pointer", fontSize: 11.5, fontWeight: 550,
+                background: rangeDays === r.days ? "var(--accent-bg-strong)" : "transparent",
+                color: rangeDays === r.days ? "var(--accent-text)" : "var(--text-muted)",
+                borderRadius: 100, transition: "all 0.15s ease",
+              }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Type filter pills */}
+      <div className="flex flex-wrap gap-2 mb-5">
+        {TYPE_FILTERS.map((t) => {
+          const isActive = typeFilter === t.value;
+          const typeColor = t.value !== "all" ? `var(--type-${t.value})` : undefined;
+          return (
+            <button
+              key={t.value}
+              onClick={() => setTypeFilter(t.value)}
+              className="font-body px-3 py-1"
+              style={{
+                borderRadius: 100, cursor: "pointer", fontSize: 12, fontWeight: 500,
+                border: isActive
+                  ? `1px solid ${typeColor ? typeColor : "var(--accent-border)"}`
+                  : "1px solid var(--border)",
+                background: isActive
+                  ? (typeColor ? `${typeColor}12` : "var(--accent-bg)")
+                  : "transparent",
+                color: isActive
+                  ? (typeColor || "var(--accent-text)")
+                  : "var(--text-muted)",
+                transition: "all 0.15s ease",
+              }}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
       {isLoading ? (
@@ -79,7 +151,7 @@ export default function TimelinePage() {
       ) : groups.length === 0 ? (
         <GlassPanel style={{ padding: "40px 20px", textAlign: "center" }}>
           <Calendar size={32} style={{ color: "var(--text-muted)", opacity: 0.4, margin: "0 auto 12px" }} />
-          <p className="font-body" style={{ fontSize: 13, color: "var(--text-muted)" }}>No initiatives yet — create your first one!</p>
+          <p className="font-body" style={{ fontSize: 13, color: "var(--text-muted)" }}>No initiatives match your filters.</p>
         </GlassPanel>
       ) : (
         <div className="flex flex-col gap-7">
@@ -104,7 +176,6 @@ export default function TimelinePage() {
                       style={{ padding: "14px 16px" }}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        {/* Left: ministry dot + title */}
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: ministry?.color || "var(--text-muted)" }} />
                           <span className="font-body truncate" style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-primary)" }}>
@@ -112,7 +183,6 @@ export default function TimelinePage() {
                           </span>
                         </div>
 
-                        {/* Right: metadata */}
                         <div className="flex items-center gap-3 flex-shrink-0 ml-5 sm:ml-0">
                           <span className="font-body" style={{ fontSize: 11, color: ministry?.color || "var(--text-muted)", fontWeight: 550 }}>
                             {ministry?.name}
@@ -125,6 +195,16 @@ export default function TimelinePage() {
                             {format(new Date(init.start_date), "MMM d")} – {format(new Date(init.end_date), "MMM d")}
                           </span>
                           <StatusChip status={init.status} />
+                          {/* Token count */}
+                          {init.token_cost_estimate != null && (
+                            <span className="font-body" style={{
+                              padding: "4px 10px", borderRadius: 7,
+                              background: "var(--accent-bg)", border: "1px solid var(--accent-border)",
+                              color: "var(--accent-text)", fontSize: 11.5, fontWeight: 550,
+                            }}>
+                              {init.token_cost_estimate}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </GlassPanel>
