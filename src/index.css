@@ -1,105 +1,310 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Font families */
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Satoshi', 'Outfit', sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', monospace;
 
+    /* Backgrounds */
+    --bg-base: #F8F7F5;
+    --bg-surface: rgba(255,255,255,0.85);
+    --bg-surface-hover: rgba(255,255,255,0.95);
+    --bg-elevated: #FFFFFF;
+    --bg-inset: #F0EEEB;
+    --bg-sidebar: rgba(24,22,19,0.97);
+    --bg-topbar: rgba(255,255,255,0.8);
+    --bg-overlay: rgba(24,22,19,0.4);
+    --bg-input: rgba(0,0,0,0.03);
+    --bg-input-hover: rgba(0,0,0,0.05);
+    --bg-ambient-1: rgba(251,191,36,0.06);
+    --bg-ambient-2: rgba(96,165,250,0.04);
+
+    /* Accent */
+    --accent: #D97706;
+    --accent-light: #F59E0B;
+    --accent-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    --accent-glow: 0 0 20px rgba(217,119,6,0.12);
+    --accent-glow-strong: 0 0 30px rgba(217,119,6,0.2);
+    --accent-bg: rgba(217,119,6,0.08);
+    --accent-bg-strong: rgba(217,119,6,0.12);
+    --accent-border: rgba(217,119,6,0.2);
+    --accent-text: #92400E;
+    --accent-on: #FFFBEB;
+
+    /* Text */
+    --text-primary: #1C1917;
+    --text-secondary: #44403C;
+    --text-tertiary: #78716C;
+    --text-muted: #A8A29E;
+    --text-on-accent: #FFFBEB;
+    --text-sidebar: #F1F5F9;
+    --text-sidebar-muted: rgba(148,163,184,0.7);
+    --text-sidebar-dim: rgba(148,163,184,0.5);
+
+    /* Borders */
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --border-sidebar: rgba(255,255,255,0.05);
+    --border-accent: rgba(217,119,6,0.25);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
+    --shadow-dropdown: 0 16px 48px rgba(0,0,0,0.1);
+    --blur-surface: blur(20px);
+    --blur-topbar: blur(30px);
+
+    /* Badge */
+    --badge-bg: rgba(244,114,182,0.12);
+    --badge-text: #DB2777;
+    --badge-border: rgba(244,114,182,0.2);
+    --badge-dot: #DB2777;
+
+    /* Status colors */
+    --status-draft-bg: rgba(120,113,108,0.1);
+    --status-draft-text: #78716C;
+    --status-draft-border: rgba(120,113,108,0.2);
+    --status-intake-bg: rgba(37,99,235,0.08);
+    --status-intake-text: #2563EB;
+    --status-intake-border: rgba(37,99,235,0.15);
+    --status-needsinfo-bg: rgba(217,119,6,0.08);
+    --status-needsinfo-text: #D97706;
+    --status-needsinfo-border: rgba(217,119,6,0.15);
+    --status-reviewed-bg: rgba(5,150,105,0.08);
+    --status-reviewed-text: #059669;
+    --status-reviewed-border: rgba(5,150,105,0.15);
+    --status-approved-bg: rgba(4,120,87,0.08);
+    --status-approved-text: #047857;
+    --status-approved-border: rgba(4,120,87,0.15);
+    --status-creativeready-bg: rgba(124,58,237,0.08);
+    --status-creativeready-text: #7C3AED;
+    --status-creativeready-border: rgba(124,58,237,0.15);
+    --status-inproduction-bg: rgba(219,39,119,0.08);
+    --status-inproduction-text: #DB2777;
+    --status-inproduction-border: rgba(219,39,119,0.15);
+    --status-scheduled-bg: rgba(79,70,229,0.08);
+    --status-scheduled-text: #4F46E5;
+    --status-scheduled-border: rgba(79,70,229,0.15);
+    --status-complete-bg: rgba(120,113,108,0.06);
+    --status-complete-text: #A8A29E;
+    --status-complete-border: rgba(120,113,108,0.12);
+
+    /* Type colors */
+    --type-campaign: #2563EB;
+    --type-series: #7C3AED;
+    --type-event: #DB2777;
+
+    /* Shadcn compat tokens */
+    --background: 36 14% 97%;
+    --foreground: 20 14% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 20 14% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 20 14% 10%;
+    --primary: 32 95% 44%;
+    --primary-foreground: 48 100% 96%;
+    --secondary: 30 11% 93%;
+    --secondary-foreground: 20 14% 10%;
+    --muted: 30 11% 93%;
+    --muted-foreground: 25 6% 53%;
+    --accent-hsl: 32 95% 44%;
+    --accent-foreground: 20 14% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border-hsl: 30 6% 90%;
+    --input: 30 6% 90%;
+    --ring: 32 95% 44%;
+    --radius: 0.625rem;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-background: 20 12% 8%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 20 10% 6%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 5% 94%;
+    --sidebar-accent-foreground: 20 10% 6%;
+    --sidebar-border: 0 0% 100% / 0.05;
+    --sidebar-ring: 32 95% 44%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  [data-theme="dark"] {
+    /* Backgrounds */
+    --bg-base: #0A0A0C;
+    --bg-surface: rgba(255,255,255,0.03);
+    --bg-surface-hover: rgba(255,255,255,0.06);
+    --bg-elevated: rgba(255,255,255,0.05);
+    --bg-inset: rgba(255,255,255,0.02);
+    --bg-sidebar: rgba(10,10,12,0.8);
+    --bg-topbar: rgba(10,10,12,0.6);
+    --bg-overlay: rgba(0,0,0,0.6);
+    --bg-input: rgba(255,255,255,0.03);
+    --bg-input-hover: rgba(255,255,255,0.05);
+    --bg-ambient-1: rgba(251,191,36,0.03);
+    --bg-ambient-2: rgba(96,165,250,0.02);
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* Accent */
+    --accent: #FBBF24;
+    --accent-light: #FCD34D;
+    --accent-gradient: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+    --accent-glow: 0 0 20px rgba(251,191,36,0.15);
+    --accent-glow-strong: 0 0 30px rgba(251,191,36,0.3);
+    --accent-bg: rgba(251,191,36,0.08);
+    --accent-bg-strong: rgba(251,191,36,0.12);
+    --accent-border: rgba(251,191,36,0.2);
+    --accent-text: #FBBF24;
+    --accent-on: #0A0A0C;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    /* Text */
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --text-tertiary: #64748B;
+    --text-muted: #475569;
+    --text-on-accent: #0A0A0C;
+    --text-sidebar: #F1F5F9;
+    --text-sidebar-muted: rgba(148,163,184,0.7);
+    --text-sidebar-dim: rgba(148,163,184,0.5);
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Borders */
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.1);
+    --border-sidebar: rgba(255,255,255,0.05);
+    --border-accent: rgba(251,191,36,0.25);
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Shadows */
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.3);
+    --shadow-dropdown: 0 16px 48px rgba(0,0,0,0.5);
+    --blur-surface: blur(20px);
+    --blur-topbar: blur(30px);
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* Badge */
+    --badge-bg: rgba(244,114,182,0.15);
+    --badge-text: #F472B6;
+    --badge-border: rgba(244,114,182,0.2);
+    --badge-dot: #F472B6;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Status colors */
+    --status-draft-bg: rgba(148,163,184,0.12);
+    --status-draft-text: #94A3B8;
+    --status-draft-border: rgba(148,163,184,0.2);
+    --status-intake-bg: rgba(96,165,250,0.12);
+    --status-intake-text: #60A5FA;
+    --status-intake-border: rgba(96,165,250,0.2);
+    --status-needsinfo-bg: rgba(251,191,36,0.12);
+    --status-needsinfo-text: #FBBF24;
+    --status-needsinfo-border: rgba(251,191,36,0.2);
+    --status-reviewed-bg: rgba(52,211,153,0.12);
+    --status-reviewed-text: #34D399;
+    --status-reviewed-border: rgba(52,211,153,0.2);
+    --status-approved-bg: rgba(16,185,129,0.12);
+    --status-approved-text: #10B981;
+    --status-approved-border: rgba(16,185,129,0.2);
+    --status-creativeready-bg: rgba(167,139,250,0.12);
+    --status-creativeready-text: #A78BFA;
+    --status-creativeready-border: rgba(167,139,250,0.2);
+    --status-inproduction-bg: rgba(244,114,182,0.12);
+    --status-inproduction-text: #F472B6;
+    --status-inproduction-border: rgba(244,114,182,0.2);
+    --status-scheduled-bg: rgba(129,140,248,0.12);
+    --status-scheduled-text: #818CF8;
+    --status-scheduled-border: rgba(129,140,248,0.2);
+    --status-complete-bg: rgba(148,163,184,0.08);
+    --status-complete-text: #64748B;
+    --status-complete-border: rgba(148,163,184,0.15);
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Type colors */
+    --type-campaign: #60A5FA;
+    --type-series: #A78BFA;
+    --type-event: #F472B6;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* Shadcn compat tokens */
+    --background: 240 10% 4%;
+    --foreground: 210 40% 96%;
+    --card: 240 10% 4%;
+    --card-foreground: 210 40% 96%;
+    --popover: 240 10% 5%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 45 93% 56%;
+    --primary-foreground: 240 10% 4%;
+    --secondary: 217 33% 18%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent-hsl: 45 93% 56%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 96%;
+    --border-hsl: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 45 93% 56%;
+
+    --sidebar-background: 240 6% 10%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 224 76% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 240 4% 16%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   body {
-    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background 0.3s ease, color 0.3s ease;
   }
+
+  ::selection {
+    background: var(--accent-bg-strong);
+    color: var(--text-primary);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .font-mono-beacon {
+    font-family: var(--font-mono);
+  }
+  .accent-gradient {
+    background: var(--accent-gradient);
+  }
+  .accent-glow {
+    box-shadow: var(--accent-glow);
+  }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
