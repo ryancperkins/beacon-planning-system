@@ -139,6 +139,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     await fetchProfile(user.id);
+    
+    // Seed demo data
+    try { await seedDemoData(churchData.id, user.id); } catch (e) { console.warn("Seed data error:", e); }
+    
     return { error: null };
   };
 
