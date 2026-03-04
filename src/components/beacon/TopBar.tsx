@@ -1,20 +1,18 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Bell, Plus, ChevronDown, LogOut } from "lucide-react";
+import { Search, Plus, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { ProfileDropdown } from "./ProfileDropdown";
+import { NotificationBell } from "./NotificationBell";
 
 interface TopBarProps {
   onSearch: () => void;
 }
 
 export function TopBar({ onSearch }: TopBarProps) {
-  const { church, profile, signOut } = useAuth();
+  const { church } = useAuth();
+  const { canCreate } = usePermissions();
   const navigate = useNavigate();
-  const [showProfile, setShowProfile] = useState(false);
-
-  const initials = profile?.full_name
-    ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-    : "?";
 
   return (
     <div
@@ -27,10 +25,8 @@ export function TopBar({ onSearch }: TopBarProps) {
         borderBottom: "1px solid var(--border)",
       }}
     >
-      {/* Spacer for mobile hamburger */}
       <div className="w-10 md:hidden" />
 
-      {/* Church name */}
       <div className="font-body flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{
         border: "1px solid var(--border)", background: "var(--bg-surface)",
         fontSize: 13, fontWeight: 500, color: "var(--text-primary)",
@@ -40,7 +36,6 @@ export function TopBar({ onSearch }: TopBarProps) {
         <ChevronDown size={12} />
       </div>
 
-      {/* Search */}
       <button
         onClick={onSearch}
         className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-body flex-shrink"
@@ -60,73 +55,22 @@ export function TopBar({ onSearch }: TopBarProps) {
 
       <div className="flex-1" />
 
-      {/* Create */}
-      <button
-        onClick={() => navigate("/create")}
-        className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-lg font-body accent-gradient accent-glow"
-        style={{
-          border: "none", color: "var(--accent-on)",
-          fontSize: "12.5px", fontWeight: 600, cursor: "pointer", letterSpacing: "0.01em",
-        }}
-      >
-        <Plus size={14} />
-        <span className="hidden sm:inline">Create</span>
-      </button>
-
-      {/* Notifications */}
-      <button
-        className="flex items-center justify-center rounded-lg relative"
-        style={{
-          width: 36, height: 36,
-          border: "1px solid var(--border)", background: "var(--bg-surface)",
-          color: "var(--text-muted)", cursor: "pointer",
-        }}
-      >
-        <Bell size={17} />
-        <span style={{
-          position: "absolute", top: -3, right: -3, width: 15, height: 15,
-          borderRadius: "50%", background: "var(--badge-dot)", color: "#fff",
-          fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center",
-          border: "2px solid var(--bg-base)", boxShadow: "0 0 8px var(--badge-border)",
-        }}>2</span>
-      </button>
-
-      {/* Profile */}
-      <div className="relative">
+      {canCreate && (
         <button
-          onClick={() => setShowProfile(!showProfile)}
-          className="flex items-center justify-center rounded-full font-body accent-gradient accent-glow"
+          onClick={() => navigate("/create")}
+          className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-lg font-body accent-gradient accent-glow"
           style={{
-            width: 32, height: 32, color: "var(--accent-on)",
-            fontSize: 11, fontWeight: 700, cursor: "pointer", border: "none",
+            border: "none", color: "var(--accent-on)",
+            fontSize: "12.5px", fontWeight: 600, cursor: "pointer", letterSpacing: "0.01em",
           }}
         >
-          {initials}
+          <Plus size={14} />
+          <span className="hidden sm:inline">Create</span>
         </button>
-        {showProfile && (
-          <div
-            className="absolute right-0 mt-2 rounded-xl overflow-hidden z-50"
-            style={{
-              background: "var(--bg-elevated)", border: "1px solid var(--border)",
-              boxShadow: "var(--shadow-dropdown)", minWidth: 180, padding: 5,
-            }}
-          >
-            <div className="px-3 py-2" style={{ fontSize: 12, color: "var(--text-muted)" }}>
-              {profile?.full_name || "User"}
-            </div>
-            <button
-              onClick={() => { signOut(); setShowProfile(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-body"
-              style={{
-                border: "none", background: "transparent", color: "var(--text-secondary)",
-                fontSize: 12.5, cursor: "pointer", textAlign: "left",
-              }}
-            >
-              <LogOut size={14} /> Sign Out
-            </button>
-          </div>
-        )}
-      </div>
+      )}
+
+      <NotificationBell />
+      <ProfileDropdown />
     </div>
   );
 }
