@@ -51,6 +51,7 @@ function generateTiers(channels: string[], isRush: boolean) {
 
 export default function CreateInitiativePage() {
   const { church, user } = useAuth();
+  const { isDirector, userMinistryIds, isAdmin, isCreativeTeam } = usePermissions();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
