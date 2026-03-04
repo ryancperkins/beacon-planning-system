@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2, AlertTriangle } from "lucide-rea
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { GlassPanel } from "@/components/beacon/GlassPanel";
 import { toast } from "sonner";
 import { differenceInDays, startOfToday, format } from "date-fns";
